@@ -6,12 +6,22 @@ import argparse
 
 def generate_ngrams(sentences, n):
     """Generates an n-gram for the given sentences"""
-    pass
+    # TODO Insert <start> at beginning of sentences
+    ngram = []
+    for i in range(0, n):
+        ngram.append([])
+    for i in range(n, 0, -1):
+        for sentence in sentences:
+            tokens = re.findall(r'[\w\']+|[\"\.\,\!\?\;\:\-\=\+\/\*\\]', sentence)
+            if len(tokens) > n:
+                ngram[i-1].append(zip(*[tokens[j:] for j in range(i)]))
+
+    return ngram
 
 def get_sentences(input_text):
     """Splits the input into sentences based on punctuation"""
     sentences = []
-    tokens = re.split(r'([\.\!\?]+)', input_text)            # Splits on and captures punctuation marks
+    tokens = re.split(r'([\.\!\?]+)', input_text)       # Splits on and captures punctuation marks
     for i, token in enumerate(tokens):
         if i > 0 and re.match(r'([\.\!\?]+)', token):   # For each token, check if it is punctuation
             sentences.append(tokens[i-1] + tokens[i])   # Create full sentence and add to sentences
@@ -27,7 +37,6 @@ def read_files(inputs):
 
 def main():
     """Main Function"""
-
     # Defining arguments
     parser = argparse.ArgumentParser(description='Generates random sentences using an ngram model based on input files.')
     parser.add_argument('ngram', nargs=1, metavar='n', type=int, 
@@ -39,8 +48,10 @@ def main():
 
     args = parser.parse_args()
 
-    print(get_sentences(read_files(args.input)))
+    ngrams = generate_ngrams(get_sentences(read_files(args.input)), args.ngram[0])
+    for ngram in ngrams:
+        for n in ngram:
+            print(list(n))
 
 if __name__ == "__main__":
     main()
-    
