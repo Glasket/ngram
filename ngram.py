@@ -142,9 +142,9 @@ def main():
     # Defining arguments for CLI
     parser = argparse.ArgumentParser(description='Generates random sentences using an n-gram model based on input files.')
     parser.add_argument('ngram', nargs=1, metavar='n', type=positive, 
-                        help='an integer that represents the n-gram')
+                        help='a positive integer that represents the n-gram')
     parser.add_argument('output', nargs=1, metavar='m', type=positive, 
-                        help='an integer that represents the number of sentences to create')
+                        help='a positive integer that represents the number of sentences to create')
     parser.add_argument('input', nargs='+', 
                         help='list of files that will be processed for the n-gram model')
     args = parser.parse_args()
