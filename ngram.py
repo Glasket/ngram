@@ -1,4 +1,23 @@
-# Python 3.7.2 
+# Python 3.7.2
+#
+# Christian W Sigmon
+# 2/19/2019 CMSC-416
+#
+# Problem: Sentences must be created from source texts using a model created based on clusters
+#          of text that makeup sentences.
+#
+# Example:
+# python ngram.py 3 3 1399.txt 2554-0.txt 2600-0.txt
+# Generates random sentences based on a specified n-gram model and input files. Christian W. Sigmon CMSC-416
+# Command Line Settings: ngram.py 3 3
+# Soon after the conversation.
+# Meaning when did you come?
+# Easter came in to see her, and she was not a word to say, and that the husband and wife.
+#
+# Algorithm: Files are parsed, sentences are then generated from the input text. These sentences
+#            are then tokenized and turned into n-grams. The n-grams and (n-1)-grams are then used
+#            to create a n-gram table which provides probabilities that can be used to generate sentences
+#
 
 import re
 import argparse
