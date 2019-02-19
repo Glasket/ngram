@@ -4,25 +4,56 @@ import re
 import argparse
 import random
 
-def generate_unigram_sentence():
-    pass
+def generate_unigram_sentence(word_list):
+    sentence = ''
+    while True:
+        rand = random.random()
+        val_sum = 0
+        for k, v in word_list.items():
+            val_sum += v
+            if val_sum > rand:
+                if re.match(r'([\.\,\!\?\;\:\=\+\/\*\\]+)', k):
+                    sentence += k
+                else:
+                    sentence += ' ' + k
+                break
+        if re.search(r'([\.\!\?]+)', sentence):
+            break
+    sentence = sentence.strip()
+    sentence = sentence.capitalize()
+    return sentence
 
-def generate_unigram_table():
-    pass
 
-def generate_unigrams():
-    pass
+def generate_unigram_table(ngram):
+    ngram_table = dict()
+    for token in ngram:
+        if token in ngram_table:
+            ngram_table[token] = ngram_table[token] + 1
+        else:
+            ngram_table[token] = 1
+    ngram_sum = sum(ngram_table.values())
+    for k, v in ngram_table.items():
+        ngram_table[k] = v/ngram_sum
+    return ngram_table
+
+def generate_unigrams(sentences):
+    ngram = []
+    for sentence in sentences:
+        tokens = re.findall(r'[\w\']+|[\.\,\!\?\;\:\=\+\/\*\\]', sentence)
+        if len(tokens) > 1:
+            ngram += tokens
+    return ngram
 
 def generate_sentence(starts, standard, n):
     sentence = ''
     current_gram = ''
     rand = random.random()
     val_sum = 0
-    for k,v in starts.items():
+    for k, v in starts.items():
         val_sum += v
         if val_sum > rand:
             for token in k[1:]:
-                if re.match(r'([\.\,\!\?\;\:\-\=\+\/\*\\]+)', token):
+                if re.match(r'([\.\,\!\?\;\:\=\+\/\*\\]+)', token):
                     sentence += token
                 else:
                     sentence += ' ' + token
@@ -31,11 +62,11 @@ def generate_sentence(starts, standard, n):
     while True:
         rand = random.random()
         val_sum = 0
-        for k,v in standard.items():
+        for k, v in standard.items():
             if k[:n-1] == current_gram:
                 val_sum += v
                 if v > rand:
-                    if re.match(r'([\.\,\!\?\;\:\-\=\+\/\*\\]+)', k[n-1]):
+                    if re.match(r'([\.\,\!\?\;\:\=\+\/\*\\]+)', k[n-1]):
                         sentence += k[n-1]
                     else:
                         sentence += ' ' + k[n-1]
@@ -71,7 +102,7 @@ def generate_ngrams(sentences, n):
     for i in range(0, 2):
         ngram.append([])
         for sentence in sentences:
-            tokens = ['<start>'] + re.findall(r'[\w\']+|[\"\.\,\!\?\;\:\-\=\+\/\*\\]', sentence)
+            tokens = ['<start>'] + re.findall(r'[\w\']+|[\.\,\!\?\;\:\=\+\/\*\\]', sentence)
             if len(tokens) > n:
                 ngram[i].append(zip(*[tokens[j:] for j in range(n-i)]))
     return ngram
@@ -106,23 +137,26 @@ def main():
     parser = argparse.ArgumentParser(description='Generates random sentences using an ngram model based on input files.')
     parser.add_argument('ngram', nargs=1, metavar='n', type=positive, 
                         help='an integer that represents the n-gram')
-    parser.add_argument('output', nargs=1, metavar='m', type=int, 
-                        help='an integer that represents the number of sentences to create (<= 0 is ignored)')
+    parser.add_argument('output', nargs=1, metavar='m', type=positive, 
+                        help='an integer that represents the number of sentences to create')
     parser.add_argument('input', nargs='+', 
                         help='list of files that will be processed for the n-gram model')
     args = parser.parse_args()
 
     if args.ngram[0] == 1: # Unigram
         # TODO Unique case for unigram
-        pass
+        ngram_table = generate_unigram_table(generate_unigrams(get_sentences(
+            read_files(args.input))))
+        for i in range(args.output[0]):
+            print(generate_unigram_sentence(ngram_table))
     else: # N-Gram greater than 1
         ngram_tables = generate_ngram_tables(generate_ngrams(get_sentences(
             read_files(args.input)), args.ngram[0]))
         starts = {k:v for k,v in ngram_tables[0].items() if '<start>' in k}
         start_sum = sum(starts.values())
-        for k,v in starts.items():
+        for k, v in starts.items():
             starts[k] = v/start_sum
-        standard = {k:v for k,v in ngram_tables[0].items() if '<start>' not in k}
+        standard = {k:v for k, v in ngram_tables[0].items() if '<start>' not in k}
 
         for i in range(args.output[0]):
             print(generate_sentence(starts, standard, args.ngram[0]))
