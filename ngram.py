@@ -6,13 +6,12 @@ import argparse
 
 def generate_ngrams(sentences, n):
     """Generates an n-gram for the given sentences"""
-    # TODO Insert <start> at beginning of sentences
     ngram = []
     for i in range(0, n):
         ngram.append([])
     for i in range(n, 0, -1):
         for sentence in sentences:
-            tokens = re.findall(r'[\w\']+|[\"\.\,\!\?\;\:\-\=\+\/\*\\]', sentence)
+            tokens = ['<start>'] + re.findall(r'[\w\']+|[\"\.\,\!\?\;\:\-\=\+\/\*\\]', sentence)
             if len(tokens) > n:
                 ngram[i-1].append(zip(*[tokens[j:] for j in range(i)]))
 
@@ -45,13 +44,20 @@ def main():
                         help='an integer that represents the number of sentences to create')
     parser.add_argument('input', nargs='+', 
                         help='list of files that will be processed for the n-gram model')
-
     args = parser.parse_args()
 
     ngrams = generate_ngrams(get_sentences(read_files(args.input)), args.ngram[0])
+
+    ngram_table = dict()
     for ngram in ngrams:
-        for n in ngram:
-            print(list(n))
+        for sentence in ngram:
+            for item in sentence:
+                key = " ".join(item)
+                if key in ngram_table:
+                    ngram_table[key] = ngram_table[key] + 1
+                else:
+                    ngram_table[key] = 1
+    print(ngram_table)
 
 if __name__ == "__main__":
     main()
