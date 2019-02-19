@@ -146,7 +146,7 @@ def read_files(inputs):
     input_text = ''
     for input_ in inputs:
         with open(input_, 'r') as input_file:
-            input_text += input_file.read().replace('\n', ' ').replace('"', '').replace('-', '') + ' '
+            input_text += input_file.read().replace('\n', ' ').replace('"', '').replace('-', ' ') + ' '
     return input_text.lower()
 
 def positive(val):
@@ -171,7 +171,7 @@ def main():
     # Print Details
     print('Generates random sentences based on a specified n-gram model and input files.' +
           ' Christian W. Sigmon CMSC-416')
-    print('Command Line Settings: ' + sys.argv[0] + ' ' + str(args.ngram[0]) + ' ' + str(args.output[0]))
+    print('Command Line Settings: ' + sys.argv[0] + ' ' + str(args.ngram[0]) + ' ' + str(args.output[0]) + '\n')
 
     # N-Gram code
     if args.ngram[0] == 1: # Unigram
@@ -179,7 +179,7 @@ def main():
         ngram_table = generate_unigram_table(generate_unigrams(get_sentences(
             read_files(args.input))))
         for i in range(args.output[0]): # Print as many sentences as requested
-            print(generate_unigram_sentence(ngram_table))
+            print(generate_unigram_sentence(ngram_table) + '\n')
     else: # N-Gram greater than 1
         ngram_tables = generate_ngram_tables(generate_ngrams(get_sentences(
             read_files(args.input)), args.ngram[0]))
@@ -192,7 +192,7 @@ def main():
         standard = {k:v for k, v in ngram_tables[0].items() if '<start>' not in k}
 
         for i in range(args.output[0]): # Print sentences for ngram model > 1
-            print(generate_sentence(starts, standard, args.ngram[0]))
+            print(generate_sentence(starts, standard, args.ngram[0]) + '\n')
 
 if __name__ == "__main__":
     main()
