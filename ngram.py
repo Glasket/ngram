@@ -4,6 +4,19 @@ import re
 import sys
 import argparse
 
+def generate_ngram_tables(ngrams):
+    ngram_tables = []
+    for ngram in ngrams:
+        ngram_table = dict()
+        for sentence in ngram:
+            for item in sentence:
+                if item in ngram_table:
+                    ngram_table[item] = ngram_table[item] + 1
+                else:
+                    ngram_table[item] = 1
+        ngram_tables.append(ngram_table)
+    return ngram_tables
+
 def generate_ngrams(sentences, n):
     """Generates an n-gram for the given sentences"""
     ngram = []
@@ -14,7 +27,6 @@ def generate_ngrams(sentences, n):
             tokens = ['<start>'] + re.findall(r'[\w\']+|[\"\.\,\!\?\;\:\-\=\+\/\*\\]', sentence)
             if len(tokens) > n:
                 ngram[i-1].append(zip(*[tokens[j:] for j in range(i)]))
-
     return ngram
 
 def get_sentences(input_text):
@@ -46,18 +58,14 @@ def main():
                         help='list of files that will be processed for the n-gram model')
     args = parser.parse_args()
 
-    ngrams = generate_ngrams(get_sentences(read_files(args.input)), args.ngram[0])
+    ngram_tables = generate_ngram_tables(generate_ngrams(get_sentences(read_files(args.input)), args.ngram[0]))
 
-    ngram_table = dict()
-    for ngram in ngrams:
-        for sentence in ngram:
-            for item in sentence:
-                key = " ".join(item)
-                if key in ngram_table:
-                    ngram_table[key] = ngram_table[key] + 1
-                else:
-                    ngram_table[key] = 1
-    print(ngram_table)
+    for i in range(args.ngram[0], 1, -1):
+        for key, value in ngram_tables[i-1].items():
+            w1 = tuple(w for w in key[:-1])
+            ngram_tables[i-1][key] = value/ngram_tables[i-2].get(w1)
+
+    print(ngram_tables)
 
 if __name__ == "__main__":
     main()
